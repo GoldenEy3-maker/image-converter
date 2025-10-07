@@ -2,16 +2,21 @@ import prompts from "prompts";
 import { readdir, unlink } from "node:fs/promises";
 import sharp from "sharp";
 
+const srcFileExeptions = [".DS_Store", ".gitkeep"];
+const distFileExeptions = [".gitkeep"];
+
 async function readSrc() {
   const files = await readdir("./src");
 
-  return files.map((file) => {
-    const extIdx = file.lastIndexOf(".");
-    const name = file.slice(0, extIdx);
-    const ext = file.slice(extIdx);
+  return files
+    .filter((file) => !srcFileExeptions.includes(file))
+    .map((file) => {
+      const extIdx = file.lastIndexOf(".");
+      const name = file.slice(0, extIdx);
+      const ext = file.slice(extIdx);
 
-    return { file, name, ext };
-  });
+      return { file, name, ext };
+    });
 }
 
 async function convertToWebp(opts) {
@@ -329,7 +334,9 @@ async function init() {
 
   const distFiles = await readdir("./dist");
 
-  distFiles.forEach((file) => unlink(`./dist/${file}`));
+  distFiles
+    .filter((file) => !distFileExeptions.includes(file))
+    .forEach((file) => unlink(`./dist/${file}`));
 
   formatterMap[promptsFormatResponse.value](formatterOpts);
 }
